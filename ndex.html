@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kenga Omega Ventures - Loan Application</title>
+<style>
+:root{--gold:#c9a84c;--navy:#0d1f4e;--navydark:#07112e;--navy2:#112459;--text:#f0f0f0;--muted:#8a9cc7;--border:#1e3070;--red:#e05555;--green:#4caf7d;--orange:#e07d30}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navydark);color:var(--text);min-height:100vh;padding:20px}
+.wrap{max-width:760px;margin:0 auto}
+.header{text-align:center;padding:30px 20px 24px;border-bottom:2px solid var(--gold);margin-bottom:30px}
+.logo{width:52px;height:52px;background:var(--gold);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;color:var(--navydark);font-size:20px;letter-spacing:-1px;margin-bottom:12px}
+.header h1{color:var(--text);font-size:22px;font-weight:800;letter-spacing:1px}
+.header h1 span{color:var(--gold)}
+.header p{color:var(--muted);font-size:13px;margin-top:4px;letter-spacing:1px}
+
+/* Progress */
+.progress{display:flex;gap:4px;margin-bottom:28px}
+.pbar{flex:1;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.pbar.done{background:var(--gold)}
+.step-label{color:var(--muted);font-size:12px;text-align:center;margin-bottom:20px}
+.step-label span{color:var(--gold);font-weight:700}
+
+/* Section card */
+.section{background:var(--navy);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:0;display:none}
+.section.active{display:block}
+.section-title{color:var(--gold);font-weight:800;font-size:16px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.section-title .num{background:var(--gold);color:#000;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0}
+
+/* Grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}.full{grid-column:1}}
+
+/* Form elements */
+.fg{display:flex;flex-direction:column;margin-bottom:4px}
+.fg label{color:var(--muted);font-size:12px;margin-bottom:5px;font-weight:600}
+.fg label .req{color:var(--red);margin-left:2px}
+.fg input,.fg select,.fg textarea{background:var(--navy2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;width:100%;outline:none;transition:border .2s}
+.fg input:focus,.fg select:focus{border-color:var(--gold)}
+.fg input.err,.fg select.err{border-color:var(--red)}
+.fg .errmsg{color:var(--red);font-size:11px;margin-top:3px;display:none}
+.fg .errmsg.show{display:block}
+select option{background:var(--navy2)}
+
+/* Radio/checkbox groups */
+.rgroup{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.rlabel{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:13px;color:var(--muted);transition:all .2s;user-select:none}
+.rlabel:hover{border-color:var(--gold);color:var(--gold)}
+.rlabel input{display:none}
+.rlabel.selected{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.1)}
+.rlabel .dot{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rlabel.selected .dot::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);display:block}
+
+/* Checkbox */
+.cklabel{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;line-height:1.5;padding:12px;background:rgba(201,168,76,.07);border:1px solid var(--gold);border-radius:8px;margin-top:10px}
+.cklabel input{display:none}
+.ckbox{width:18px;height:18px;border:2px solid var(--gold);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.cklabel.checked .ckbox{background:var(--gold)}
+.cklabel.checked .ckbox::after{content:'✓';color:#000;font-size:12px;font-weight:900}
+
+/* Declaration */
+.decl{background:rgba(201,168,76,.07);border-left:4px solid var(--gold);padding:14px;font-size:13px;border-radius:0 8px 8px 0;margin-top:14px;color:var(--muted);line-height:1.7}
+.decl strong{color:var(--gold)}
+
+/* Buttons */
+.btnrow{display:flex;gap:12px;margin-top:24px}
+.btn{padding:13px 28px;border-radius:9px;border:none;cursor:pointer;font-weight:700;font-size:14px;flex:1;transition:.2s}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:#e2c07a}
+.btn-ghost{background:var(--navy2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Error summary */
+.errsummary{background:rgba(224,85,85,.1);border:1px solid rgba(224,85,85,.4);border-radius:8px;padding:14px;margin-bottom:18px;display:none}
+.errsummary.show{display:block}
+.errsummary .etitle{color:var(--red);font-weight:700;font-size:13px;margin-bottom:6px}
+.errsummary ul{padding-left:18px;color:var(--red);font-size:12px}
+
+/* Success */
+.success{text-align:center;padding:50px 20px;display:none}
+.success.show{display:block}
+.success .icon{font-size:60px;margin-bottom:20px}
+.success h2{color:var(--gold);font-size:24px;margin-bottom:10px}
+.success p{color:var(--muted);font-size:15px;max-width:400px;margin:0 auto 24px}
+.success .ref{background:var(--navy);border:1px solid var(--gold);border-radius:10px;padding:16px;display:inline-block;margin-bottom:24px}
+.success .ref p{color:var(--muted);font-size:12px;margin-bottom:4px}
+.success .ref h3{color:var(--gold);font-size:20px;font-weight:900}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">KΩ</div>
+    <h1>KengaOmega <span>Ventures</span></h1>
+    <p>LOAN ACCOUNT OPENING & APPLICATION FORM</p>
+  </div>
+
+  <div id="progressBars" class="progress"></div>
+  <div id="stepLabel" class="step-label"></div>
+  <div id="errSummary" class="errsummary"><div class="etitle">⚠ Please fix the following:</div><ul id="errList"></ul></div>
+
+  <!-- STEP 1: Personal Info -->
+  <div class="section active" id="s1">
+    <div class="section-title"><span class="num">1</span>Personal Information</div>
+    <div class="g3">
+      <div class="fg"><label>Title<span class="req">*</span></label>
+        <select id="title"><option value="">Select...</option><option>Mr</option><option>Mrs</option><option>Miss</option><option>Dr</option><option>Prof</option><option>Chief</option><option>Alhaji</option><option>Alhaja</option></select>
+        <span class="errmsg">Required</span></div>
+      <div class="fg"><label>Surname<span class="req">*</span></label><input id="surname" placeholder="Doe"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>First Name<span class="req">*</span></label><input id="firstName" placeholder="John"><span class="errmsg">Required</span></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Other Name</label><input id="otherName" placeholder="Optional"></div>
+      <div class="fg"><label>Sex<span class="req">*</span></label>
+        <select id="sex"><option value="">Select...</option><option>Male</option><option>Female</option></select>
+        <span class="errmsg">Required</span></div>
+      <div class="fg"><label>Date of Birth<span class="req">*</span></label><input type="date" id="dob"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Mother's Maiden Name<span class="req">*</span></label><input id="motherMaiden"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Nationality</label><input id="nationality" value="Nigerian"></div>
+      <div class="fg"><label>State<span class="req">*</span></label><input id="state"><span class="errmsg">Required</span></div>
+    </div>
+    <div class="g2" style="margin-top:4px">
+      <div class="fg"><label>LGA<span class="req">*</span></label><input id="lga"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Phone Number<span class="req">*</span></label><input id="phone" placeholder="08012345678"><span class="errmsg">Enter valid 10–14 digit number</span></div>
+    </div>
+    <div class="fg full" style="margin-top:4px"><label>Residential Address<span class="req">*</span></label><input id="resAddress"><span class="errmsg">Required</span></div>
+    <div class="fg full"><label>Mailing Address</label><input id="mailAddress" placeholder="Same as above or different"></div>
+    <div class="fg full"><label>Email Address<span class="req">*</span></label><input type="email" id="email" placeholder="john@example.com"><span class="errmsg">Enter valid email</span></div>
+    <div class="btnrow"><button class="btn btn-gold" onclick="next(1)">Continue →</button></div>
+  </div>
+
+  <!-- STEP 2: Identity -->
+  <div class="section" id="s2">
+    <div class="section-title"><span class="num">2</span>Identity Verification</div>
+    <div class="fg"><label>Identity Type<span class="req">*</span></label>
+      <div class="rgroup" id="idTypeGroup">
+        <label class="rlabel" onclick="pickRadio(this,'idTypeGroup','National ID')"><span class="dot"></span>National ID</label>
+        <label class="rlabel" onclick="pickRadio(this,'idTypeGroup','Int\'l Passport')"><span class="dot"></span>Int'l Passport</label>
+        <label class="rlabel" onclick="pickRadio(this,'idTypeGroup','Driver\'s Licence')"><span class="dot"></span>Driver's Licence</label>
+        <label class="rlabel" onclick="pickRadio(this,'idTypeGroup','Voter\'s Card')"><span class="dot"></span>Voter's Card</label>
+      </div>
+      <span class="errmsg" id="idTypeErr">Please select an identity type</span>
+    </div>
+    <div class="g3">
+      <div class="fg"><label>ID Number<span class="req">*</span></label><input id="idNum"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Date Issued</label><input type="date" id="idIssued"></div>
+      <div class="fg"><label>Expiry Date</label><input type="date" id="idExpiry"></div>
+    </div>
+    <div class="g2">
+      <div class="fg">
+        <label>BVN (11 digits) <span style="color:var(--orange);font-size:11px">optional — required before disbursement</span></label>
+        <input id="bvn" maxlength="11" placeholder="Leave blank if unknown">
+        <span class="errmsg">BVN must be 11 digits</span>
+        <span style="color:var(--orange);font-size:11px;margin-top:4px;display:block" id="bvnWarn"></span>
+      </div>
+      <div class="fg">
+        <label>NIN (11 digits) <span style="color:var(--orange);font-size:11px">optional — required before disbursement</span></label>
+        <input id="nin" maxlength="11" placeholder="Leave blank if unknown">
+        <span class="errmsg">NIN must be 11 digits</span>
+        <span style="color:var(--orange);font-size:11px;margin-top:4px;display:block" id="ninWarn"></span>
+      </div>
+    </div>
+    <div style="background:var(--navy2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:8px">
+      <div style="color:var(--gold);font-weight:700;font-size:13px;margin-bottom:10px">❓ How to check your BVN & NIN</div>
+      <div style="color:var(--muted);font-size:12px;line-height:2">
+        📱 <strong style="color:var(--text)">BVN:</strong> Dial *565*0# on your registered bank line<br>
+        🏦 <strong style="color:var(--text)">BVN:</strong> Check your bank's mobile app → Profile → BVN<br>
+        📱 <strong style="color:var(--text)">NIN:</strong> Dial *346# on MTN, Airtel, Glo or 9mobile<br>
+        📲 <strong style="color:var(--text)">NIN:</strong> Download the NIMC Mobile App
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(2)">← Back</button>
+      <button class="btn btn-gold" onclick="next(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Employment -->
+  <div class="section" id="s3">
+    <div class="section-title"><span class="num">3</span>Employment & Income</div>
+    <div class="fg"><label>Employment Status<span class="req">*</span></label>
+      <div class="rgroup" id="empGroup">
+        <label class="rlabel" onclick="pickRadio(this,'empGroup','Salary Employed')"><span class="dot"></span>Salary Employed</label>
+        <label class="rlabel" onclick="pickRadio(this,'empGroup','Self Employed')"><span class="dot"></span>Self Employed</label>
+        <label class="rlabel" onclick="pickRadio(this,'empGroup','Retired')"><span class="dot"></span>Retired</label>
+        <label class="rlabel" onclick="pickRadio(this,'empGroup','Unemployed')"><span class="dot"></span>Unemployed</label>
+        <label class="rlabel" onclick="pickRadio(this,'empGroup','Student')"><span class="dot"></span>Student</label>
+      </div>
+      <span class="errmsg" id="empErr">Please select employment status</span>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Occupation<span class="req">*</span></label><input id="occupation"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Source of Income<span class="req">*</span></label><input id="sourceIncome" placeholder="Salary, Business, Investment"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Employer / Company Name<span class="req">*</span></label><input id="employerName"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Employer Phone</label><input id="employerPhone"></div>
+    </div>
+    <div class="fg"><label>Employer Address<span class="req">*</span></label><input id="employerAddress"><span class="errmsg">Required</span></div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(3)">← Back</button>
+      <button class="btn btn-gold" onclick="next(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Bank -->
+  <div class="section" id="s4">
+    <div class="section-title"><span class="num">4</span>Bank Details</div>
+    <div class="g2">
+      <div class="fg"><label>Account Name<span class="req">*</span></label><input id="accName" placeholder="Must match identity name"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Bank Name<span class="req">*</span></label><input id="bankName"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Account Number (10 digits)<span class="req">*</span></label><input id="accNum" maxlength="10" placeholder="10 digits"><span class="errmsg">Must be 10 digits</span></div>
+      <div class="fg"><label>Account Opening Date</label><input type="month" id="accOpenDate"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(4)">← Back</button>
+      <button class="btn btn-gold" onclick="next(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Loan -->
+  <div class="section" id="s5">
+    <div class="section-title"><span class="num">5</span>Loan Details</div>
+    <div class="g2">
+      <div class="fg"><label>Loan Amount (₦)<span class="req">*</span></label>
+        <input type="number" id="loanAmt" placeholder="e.g. 50000" oninput="updateWords()">
+        <span class="errmsg">Enter valid amount</span></div>
+      <div class="fg"><label>Amount in Words</label><input id="loanWords" placeholder="Auto-filled" readonly style="background:rgba(255,255,255,.05)"></div>
+    </div>
+    <div class="fg"><label>Preferred Tenure<span class="req">*</span></label>
+      <div class="rgroup" id="tenureGroup">
+        <label class="rlabel" onclick="pickRadio(this,'tenureGroup','30 days')"><span class="dot"></span>30 Days</label>
+        <label class="rlabel" onclick="pickRadio(this,'tenureGroup','90 days')"><span class="dot"></span>90 Days</label>
+        <label class="rlabel" onclick="pickRadio(this,'tenureGroup','120 days')"><span class="dot"></span>120 Days</label>
+        <label class="rlabel" onclick="pickRadio(this,'tenureGroup','180 days')"><span class="dot"></span>180 Days</label>
+        <label class="rlabel" onclick="pickRadio(this,'tenureGroup','270 days')"><span class="dot"></span>270 Days</label>
+        <label class="rlabel" onclick="pickRadio(this,'tenureGroup','365 days')"><span class="dot"></span>365 Days</label>
+      </div>
+      <span class="errmsg" id="tenureErr">Please select a tenure</span>
+    </div>
+    <div class="fg"><label>Purpose of Loan<span class="req">*</span></label><input id="loanPurpose" placeholder="e.g. School fees, Business capital"><span class="errmsg">Required</span></div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(5)">← Back</button>
+      <button class="btn btn-gold" onclick="next(5)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Next of Kin -->
+  <div class="section" id="s6">
+    <div class="section-title"><span class="num">6</span>Next of Kin</div>
+    <div class="g3">
+      <div class="fg"><label>Full Name<span class="req">*</span></label><input id="nokName"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Sex<span class="req">*</span></label>
+        <select id="nokSex"><option value="">Select...</option><option>Male</option><option>Female</option></select>
+        <span class="errmsg">Required</span></div>
+      <div class="fg"><label>Relationship<span class="req">*</span></label><input id="nokRel" placeholder="Spouse, Parent, Sibling"><span class="errmsg">Required</span></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label>Phone Number<span class="req">*</span></label><input id="nokPhone"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Email Address</label><input type="email" id="nokEmail"></div>
+      <div class="fg full"><label>Residential Address<span class="req">*</span></label><input id="nokAddress"><span class="errmsg">Required</span></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(6)">← Back</button>
+      <button class="btn btn-gold" onclick="next(6)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 7: Guarantor -->
+  <div class="section" id="s7">
+    <div class="section-title"><span class="num">7</span>Guarantor Information</div>
+    <div class="g2">
+      <div class="fg"><label>Guarantor Full Name<span class="req">*</span></label><input id="gName"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Mobile Phone<span class="req">*</span></label><input id="gPhone"><span class="errmsg">Required</span></div>
+      <div class="fg full"><label>Residential Address<span class="req">*</span></label><input id="gAddress"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Personal Email<span class="req">*</span></label><input type="email" id="gEmail"><span class="errmsg">Enter valid email</span></div>
+      <div class="fg"><label>Years Knowing Applicant<span class="req">*</span></label><input type="number" id="gYears" min="0"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Employer / Company<span class="req">*</span></label><input id="gCompany"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Job Role<span class="req">*</span></label><input id="gRole"><span class="errmsg">Required</span></div>
+      <div class="fg"><label>Office Phone</label><input id="gWorkPhone"></div>
+      <div class="fg"><label>Office Email</label><input type="email" id="gOfficeEmail"></div>
+      <div class="fg full"><label>Office Address<span class="req">*</span></label><input id="gOfficeAddress"><span class="errmsg">Required</span></div>
+    </div>
+    <div class="decl">
+      <strong>Guarantor Legal Binding Clause:</strong><br>
+      I hereby personally guarantee to make full payment of any obligation of the applicant and I hereby agree to bind myself to pay on demand any sum which may become due when the applicant fails to pay same. It is understood that this guaranty shall be a continuing and irrevocable guaranty and indemnity for such indebtedness of the applicant. I do hereby waive notice of default, nonpayment and notice thereof, and consent to any modification of the loan agreement hereby guaranteed.
+    </div>
+    <label class="cklabel" id="agreeLabel" onclick="toggleCk()">
+      <span class="ckbox" id="ckbox"></span>
+      <span>I legally confirm, accept, and digitally sign the indemnity statement above as the guarantor for this loan application.</span>
+    </label>
+    <span class="errmsg" id="agreeErr" style="margin-top:6px">You must accept the guarantor agreement</span>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(7)">← Back</button>
+      <button class="btn btn-gold" onclick="next(7)">Review & Submit →</button>
+    </div>
+  </div>
+
+  <!-- STEP 8: Review -->
+  <div class="section" id="s8">
+    <div class="section-title"><span class="num">8</span>Review Your Application</div>
+    <div id="reviewContent"></div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" onclick="prev(8)">← Edit</button>
+      <button class="btn btn-gold" id="submitBtn" onclick="submitForm()">✓ Submit Application</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success" id="successScreen">
+    <div class="icon">🎉</div>
+    <h2>Application Submitted!</h2>
+    <p>Thank you for applying with KengaOmega Ventures. Your application has been received and is under review.</p>
+    <div class="ref">
+      <p>Your Reference Number</p>
+      <h3 id="refNum"></h3>
+    </div>
+    <p style="font-size:13px;color:var(--muted)">We will contact you on the phone number and email provided within 24–48 hours.</p>
+  </div>
+</div>
+
+<script>
+const STEPS = 8;
+const radioValues = {};
+let agreed = false;
+
+// Init progress
+function initProgress(){
+  const pb = document.getElementById('progressBars');
+  pb.innerHTML = '';
+  for(let i=1;i<=STEPS;i++){
+    const d = document.createElement('div');
+    d.className = 'pbar';
+    d.id = 'pb'+i;
+    pb.appendChild(d);
+  }
+}
+initProgress();
+
+function updateProgress(step){
+  for(let i=1;i<=STEPS;i++){
+    document.getElementById('pb'+i).classList.toggle('done', i < step);
+  }
+  const labels = ['Personal Info','Identity','Employment','Bank Details','Loan Details','Next of Kin','Guarantor','Review'];
+  document.getElementById('stepLabel').innerHTML = `Step <span>${step} of ${STEPS}</span>: ${labels[step-1]}`;
+}
+updateProgress(1);
+
+function showStep(n){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById('s'+n);
+  if(el){ el.classList.add('active'); window.scrollTo(0,0); }
+  updateProgress(n);
+  document.getElementById('errSummary').classList.remove('show');
+  if(n===8) buildReview();
+}
+
+function pickRadio(el, groupId, val){
+  document.querySelectorAll('#'+groupId+' .rlabel').forEach(l=>l.classList.remove('selected'));
+  el.classList.add('selected');
+  radioValues[groupId] = val;
+  document.getElementById(groupId+'Err') && (document.getElementById(groupId+'Err').classList.remove('show'));
+}
+
+function toggleCk(){
+  agreed = !agreed;
+  document.getElementById('agreeLabel').classList.toggle('checked', agreed);
+  document.getElementById('agreeErr').classList.remove('show');
+}
+
+function val(id){ return (document.getElementById(id)||{}).value?.trim()||''; }
+function setErr(id, show){
+  const inp = document.getElementById(id);
+  if(!inp) return;
+  inp.classList.toggle('err', show);
+  const msg = inp.parentElement.querySelector('.errmsg');
+  if(msg) msg.classList.toggle('show', show);
+}
+
+function showSummary(errs){
+  const s = document.getElementById('errSummary');
+  const ul = document.getElementById('errList');
+  ul.innerHTML = errs.map(e=>`<li>${e}</li>`).join('');
+  s.classList.add('show');
+  s.scrollIntoView({behavior:'smooth'});
+}
+
+// Step validations
+function validateStep(n){
+  const errs = [];
+  if(n===1){
+    if(!val('title')){ setErr('title',true); errs.push('Title is required'); } else setErr('title',false);
+    if(!val('surname')){ setErr('surname',true); errs.push('Surname is required'); } else setErr('surname',false);
+    if(!val('firstName')){ setErr('firstName',true); errs.push('First Name is required'); } else setErr('firstName',false);
+    if(!val('sex')){ setErr('sex',true); errs.push('Sex is required'); } else setErr('sex',false);
+    if(!val('dob')){ setErr('dob',true); errs.push('Date of Birth is required'); } else setErr('dob',false);
+    if(!val('motherMaiden')){ setErr('motherMaiden',true); errs.push("Mother's Maiden Name is required"); } else setErr('motherMaiden',false);
+    if(!val('state')){ setErr('state',true); errs.push('State is required'); } else setErr('state',false);
+    if(!val('lga')){ setErr('lga',true); errs.push('LGA is required'); } else setErr('lga',false);
+    if(!val('resAddress')){ setErr('resAddress',true); errs.push('Residential Address is required'); } else setErr('resAddress',false);
+    const ph = val('phone');
+    if(!/^[0-9]{10,14}$/.test(ph.replace(/\s/g,''))){ setErr('phone',true); errs.push('Valid phone number required (10–14 digits)'); } else setErr('phone',false);
+    const em = val('email');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ setErr('email',true); errs.push('Valid email address required'); } else setErr('email',false);
+  }
+  if(n===2){
+    if(!radioValues['idTypeGroup']){ document.getElementById('idTypeErr').classList.add('show'); errs.push('Identity type required'); } else document.getElementById('idTypeErr').classList.remove('show');
+    if(!val('idNum')){ setErr('idNum',true); errs.push('ID Number is required'); } else setErr('idNum',false);
+    const bvn = val('bvn'), nin = val('nin');
+    if(bvn && !/^[0-9]{11}$/.test(bvn)){ setErr('bvn',true); errs.push('BVN must be exactly 11 digits'); } else setErr('bvn',false);
+    if(nin && !/^[0-9]{11}$/.test(nin)){ setErr('nin',true); errs.push('NIN must be exactly 11 digits'); } else setErr('nin',false);
+    document.getElementById('bvnWarn').textContent = !bvn ? '⚠ Required before disbursement' : '';
+    document.getElementById('ninWarn').textContent = !nin ? '⚠ Required before disbursement' : '';
+  }
+  if(n===3){
+    if(!radioValues['empGroup']){ document.getElementById('empErr').classList.add('show'); errs.push('Employment status required'); } else document.getElementById('empErr').classList.remove('show');
+    if(!val('occupation')){ setErr('occupation',true); errs.push('Occupation is required'); } else setErr('occupation',false);
+    if(!val('sourceIncome')){ setErr('sourceIncome',true); errs.push('Source of income is required'); } else setErr('sourceIncome',false);
+    if(!val('employerName')){ setErr('employerName',true); errs.push("Employer name is required"); } else setErr('employerName',false);
+    if(!val('employerAddress')){ setErr('employerAddress',true); errs.push('Employer address is required'); } else setErr('employerAddress',false);
+  }
+  if(n===4){
+    if(!val('accName')){ setErr('accName',true); errs.push('Account name is required'); } else setErr('accName',false);
+    if(!val('bankName')){ setErr('bankName',true); errs.push('Bank name is required'); } else setErr('bankName',false);
+    if(!/^[0-9]{10}$/.test(val('accNum'))){ setErr('accNum',true); errs.push('Account number must be exactly 10 digits'); } else setErr('accNum',false);
+  }
+  if(n===5){
+    const la = parseFloat(val('loanAmt'));
+    if(!la || la<=0){ setErr('loanAmt',true); errs.push('Valid loan amount is required'); } else setErr('loanAmt',false);
+    if(!radioValues['tenureGroup']){ document.getElementById('tenureErr').classList.add('show'); errs.push('Loan tenure is required'); } else document.getElementById('tenureErr').classList.remove('show');
+    if(!val('loanPurpose')){ setErr('loanPurpose',true); errs.push('Loan purpose is required'); } else setErr('loanPurpose',false);
+  }
+  if(n===6){
+    if(!val('nokName')){ setErr('nokName',true); errs.push('Next of Kin name is required'); } else setErr('nokName',false);
+    if(!val('nokSex')){ setErr('nokSex',true); errs.push('Next of Kin sex is required'); } else setErr('nokSex',false);
+    if(!val('nokRel')){ setErr('nokRel',true); errs.push('Relationship is required'); } else setErr('nokRel',false);
+    if(!val('nokPhone')){ setErr('nokPhone',true); errs.push('Next of Kin phone is required'); } else setErr('nokPhone',false);
+    if(!val('nokAddress')){ setErr('nokAddress',true); errs.push('Next of Kin address is required'); } else setErr('nokAddress',false);
+  }
+  if(n===7){
+    if(!val('gName')){ setErr('gName',true); errs.push('Guarantor name is required'); } else setErr('gName',false);
+    if(!val('gPhone')){ setErr('gPhone',true); errs.push('Guarantor phone is required'); } else setErr('gPhone',false);
+    if(!val('gAddress')){ setErr('gAddress',true); errs.push('Guarantor address is required'); } else setErr('gAddress',false);
+    const ge = val('gEmail');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ge)){ setErr('gEmail',true); errs.push('Valid guarantor email is required'); } else setErr('gEmail',false);
+    if(!val('gYears')){ setErr('gYears',true); errs.push('Years known is required'); } else setErr('gYears',false);
+    if(!val('gCompany')){ setErr('gCompany',true); errs.push("Guarantor's employer is required"); } else setErr('gCompany',false);
+    if(!val('gRole')){ setErr('gRole',true); errs.push('Job role is required'); } else setErr('gRole',false);
+    if(!val('gOfficeAddress')){ setErr('gOfficeAddress',true); errs.push('Office address is required'); } else setErr('gOfficeAddress',false);
+    if(!agreed){ document.getElementById('agreeErr').classList.add('show'); errs.push('Guarantor must accept the legal agreement'); }
+  }
+  return errs;
+}
+
+function next(n){
+  const errs = validateStep(n);
+  if(errs.length>0){ showSummary(errs); return; }
+  showStep(n+1);
+}
+function prev(n){ showStep(n-1); }
+
+// Number to words
+function numToWords(n){
+  if(n===0) return 'Zero';
+  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function h(n){
+    if(n<20) return ones[n];
+    if(n<100) return tens[Math.floor(n/10)]+(n%10?' '+ones[n%10]:'');
+    return ones[Math.floor(n/100)]+' Hundred'+(n%100?' '+h(n%100):'');
+  }
+  let result='';
+  if(n>=1000000){ result+=h(Math.floor(n/1000000))+' Million '; n%=1000000; }
+  if(n>=1000){ result+=h(Math.floor(n/1000))+' Thousand '; n%=1000; }
+  if(n>0) result+=h(n);
+  return result.trim()+' Naira Only';
+}
+function updateWords(){
+  const v = parseFloat(document.getElementById('loanAmt').value)||0;
+  document.getElementById('loanWords').value = v>0 ? numToWords(v) : '';
+}
+
+// Review
+function buildReview(){
+  const rows = [
+    ['Full Name', `${val('title')} ${val('surname')} ${val('firstName')} ${val('otherName')}`.trim()],
+    ['Sex', val('sex')], ['Date of Birth', val('dob')],
+    ['Phone', val('phone')], ['Email', val('email')],
+    ['Residential Address', val('resAddress')],
+    ['Identity Type', radioValues['idTypeGroup']||'—'],
+    ['ID Number', val('idNum')],
+    ['BVN', val('bvn')||'⚠ Not provided'], ['NIN', val('nin')||'⚠ Not provided'],
+    ['Employment Status', radioValues['empGroup']||'—'],
+    ['Occupation', val('occupation')], ['Source of Income', val('sourceIncome')],
+    ['Employer', val('employerName')],
+    ['Bank', `${val('bankName')} · ${val('accNum')}`],
+    ['Account Name', val('accName')],
+    ['Loan Amount', `₦${parseFloat(val('loanAmt')||0).toLocaleString('en-NG',{minimumFractionDigits:2})}`],
+    ['Loan Tenure', radioValues['tenureGroup']||'—'],
+    ['Purpose', val('loanPurpose')],
+    ['Next of Kin', `${val('nokName')} (${val('nokRel')})`],
+    ['Guarantor', `${val('gName')} · ${val('gPhone')}`],
+  ];
+  const html = rows.map(([k,v])=>`
+    <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--muted);font-size:13px">${k}</span>
+      <span style="color:${v.includes('⚠')?'var(--orange)':'var(--text)'};font-size:13px;font-weight:600;text-align:right;max-width:60%">${v}</span>
+    </div>`).join('');
+  document.getElementById('reviewContent').innerHTML = `<div style="background:var(--navy2);border-radius:10px;padding:16px">${html}</div>`;
+}
+
+function submitForm(){
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  setTimeout(()=>{
+    const ref = 'KOV-'+Date.now().toString().slice(-8).toUpperCase();
+    document.getElementById('refNum').textContent = ref;
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('progressBars').style.display='none';
+    document.getElementById('stepLabel').style.display='none';
+    document.getElementById('successScreen').classList.add('show');
+    window.scrollTo(0,0);
+  },1500);
+}
+</script>
+</body>
+</html>
