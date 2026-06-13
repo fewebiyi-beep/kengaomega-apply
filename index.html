@@ -511,19 +511,95 @@ function buildReview(){
   document.getElementById('reviewContent').innerHTML = `<div style="background:var(--navy2);border-radius:10px;padding:16px">${html}</div>`;
 }
 
-function submitForm(){
+async function submitForm(){
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = 'Submitting...';
-  setTimeout(()=>{
-    const ref = 'KOV-'+Date.now().toString().slice(-8).toUpperCase();
-    document.getElementById('refNum').textContent = ref;
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-    document.getElementById('progressBars').style.display='none';
-    document.getElementById('stepLabel').style.display='none';
-    document.getElementById('successScreen').classList.add('show');
-    window.scrollTo(0,0);
-  },1500);
+
+  const ref = 'KOV-'+Date.now().toString().slice(-8).toUpperCase();
+
+  const data = {
+    _subject: `New Loan Application — ${val('surname')} ${val('firstName')} [${ref}]`,
+    reference: ref,
+    // Personal
+    full_name: `${val('title')} ${val('surname')} ${val('firstName')} ${val('otherName')}`.trim(),
+    sex: val('sex'),
+    date_of_birth: val('dob'),
+    phone: val('phone'),
+    email: val('email'),
+    residential_address: val('resAddress'),
+    mailing_address: val('mailAddress'),
+    state: val('state'),
+    lga: val('lga'),
+    nationality: val('nationality'),
+    mothers_maiden_name: val('motherMaiden'),
+    // Identity
+    identity_type: radioValues['idTypeGroup']||'',
+    id_number: val('idNum'),
+    id_issued: val('idIssued'),
+    id_expiry: val('idExpiry'),
+    bvn: val('bvn')||'Not provided',
+    nin: val('nin')||'Not provided',
+    // Employment
+    employment_status: radioValues['empGroup']||'',
+    occupation: val('occupation'),
+    source_of_income: val('sourceIncome'),
+    employer_name: val('employerName'),
+    employer_phone: val('employerPhone'),
+    employer_address: val('employerAddress'),
+    // Bank
+    account_name: val('accName'),
+    bank_name: val('bankName'),
+    account_number: val('accNum'),
+    // Loan
+    loan_amount: `₦${parseFloat(val('loanAmt')||0).toLocaleString('en-NG',{minimumFractionDigits:2})}`,
+    loan_amount_words: val('loanWords'),
+    loan_tenure: radioValues['tenureGroup']||'',
+    loan_purpose: val('loanPurpose'),
+    // Next of Kin
+    nok_name: val('nokName'),
+    nok_sex: val('nokSex'),
+    nok_relationship: val('nokRel'),
+    nok_phone: val('nokPhone'),
+    nok_email: val('nokEmail'),
+    nok_address: val('nokAddress'),
+    // Guarantor
+    guarantor_name: val('gName'),
+    guarantor_phone: val('gPhone'),
+    guarantor_address: val('gAddress'),
+    guarantor_email: val('gEmail'),
+    guarantor_years_known: val('gYears'),
+    guarantor_employer: val('gCompany'),
+    guarantor_role: val('gRole'),
+    guarantor_office_phone: val('gWorkPhone'),
+    guarantor_office_email: val('gOfficeEmail'),
+    guarantor_office_address: val('gOfficeAddress'),
+  };
+
+  try {
+    const res = await fetch('https://formspree.io/f/mlgkooqg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if(res.ok){
+      document.getElementById('refNum').textContent = ref;
+      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+      document.getElementById('progressBars').style.display='none';
+      document.getElementById('stepLabel').style.display='none';
+      document.getElementById('errSummary').style.display='none';
+      document.getElementById('successScreen').classList.add('show');
+      window.scrollTo(0,0);
+    } else {
+      btn.disabled = false;
+      btn.textContent = '✓ Submit Application';
+      alert('Submission failed. Please check your connection and try again.');
+    }
+  } catch(e){
+    btn.disabled = false;
+    btn.textContent = '✓ Submit Application';
+    alert('Submission failed. Please check your connection and try again.');
+  }
 }
 </script>
 </body>
